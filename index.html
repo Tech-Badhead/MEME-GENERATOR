@@ -1,3 +1,5 @@
+<!-- Chosen Palette: Energetic Dark (Deep Purple/Indigo, Teal Accent, Lime Green/Yellow Highlights) -->
+<!-- Application Structure Plan: A two-column (desktop) / stacked (mobile) layout is used. The left column is the "CANVAS" area, providing immediate visual feedback. The right column is the "CONTROL PANEL," housing all inputs. This structure prioritizes the creation flow, ensuring inputs and outputs are side-by-side on large screens for maximum usability. The design uses dark backgrounds and vibrant accents for a modern, energetic feel. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,6 +32,33 @@
             width: 100%; /* Important: Canvas element itself must be 100% of container */
             height: auto;
         }
+
+        /* Style for the color picker input */
+        #fontColor {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        #fontColor::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        #fontColor::-webkit-color-swatch {
+            border: 2px solid #6366F1;
+            border-radius: 9999px; /* full rounded */
+        }
+        #fontColor::-moz-color-swatch-wrapper {
+            padding: 0;
+        }
+        #fontColor::-moz-color-swatch {
+            border: 2px solid #6366F1;
+            border-radius: 9999px; /* full rounded */
+        }
     </style>
 </head>
 <body>
@@ -47,7 +76,13 @@
                     <!-- The canvas is where the magic happens and the final image is drawn -->
                     <canvas id="memeCanvas" width="600" height="400"></canvas>
                 </div>
-                <div class="mt-4 text-center text-sm text-gray-400">
+                <!-- Hint for clipboard paste functionality -->
+                <div class="mt-4 text-center text-sm text-gray-400 flex items-center justify-center space-x-2 p-2 bg-slate-800 rounded-lg">
+                    <span>
+                        🎨 Paste Image Ready! Press <kbd class="px-1 py-0.5 border border-slate-600 rounded-md bg-slate-700 text-teal-300">Ctrl+V</kbd> or <kbd class="px-1 py-0.5 border border-slate-600 rounded-md bg-slate-700 text-teal-300">Cmd+V</kbd> to upload directly from your clipboard.
+                    </span>
+                </div>
+                <div class="mt-2 text-center text-sm text-gray-400">
                     Meme Size: 600x400 (aspect ratio is maintained for downloads)
                 </div>
             </section>
@@ -78,15 +113,15 @@
                     <label for="textSize" class="block text-sm font-medium text-teal-400">4. Text Size: <span id="textSizeValue" class="font-bold text-lg">40px</span></label>
                     <input type="range" id="textSize" min="10" max="80" value="40" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer range-lg accent-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
-
-                <!-- NEW: Font Color Picker -->
+                
+                <!-- Font Color Picker -->
                 <div class="flex justify-between items-center space-x-4 pt-2">
                     <label for="fontColor" class="block text-sm font-medium text-teal-400">5. Font Color</label>
-                    <div class="flex items-center space-x-2 bg-slate-700 rounded-full p-2 border border-indigo-500">
-                    <input type="color" id="fontColor" value="#FFFFFF">
-                    <span id="fontColorHex" class="text-xs font-mono text-gray-300 pr-2">#FFFFFF</span>
-                     </div>
-               </div>
+                    <div class="flex items-center space-x-2 bg-slate-700 rounded-full p-1 border border-indigo-500">
+                        <input type="color" id="fontColor" value="#FFFFFF">
+                        <span id="fontColorHex" class="text-xs font-mono text-gray-300 pr-2">#FFFFFF</span>
+                    </div>
+                </div>
 
                 <!-- Download Button -->
                 <button id="downloadMeme" class="w-full py-3 mt-8 text-lg font-bold rounded-full bg-lime-500 text-slate-900 hover:bg-lime-400 transition duration-150 transform hover:scale-[1.02] shadow-xl shadow-lime-500/30 focus:outline-none focus:ring-4 focus:ring-lime-500/50">
@@ -97,6 +132,7 @@
     </div>
 
     <script>
+        (function() { // Wrap script content in IIFE to prevent global variable re-declaration error
         const canvas = document.getElementById('memeCanvas');
         const ctx = canvas.getContext('2d');
         const imageUpload = document.getElementById('imageUpload');
@@ -104,24 +140,70 @@
         const bottomText = document.getElementById('bottomText');
         const textSize = document.getElementById('textSize');
         const textSizeValue = document.getElementById('textSizeValue');
-        const fontColor = document.getElementById('fontColor'); // New element
-        const fontColorHex = document.getElementById('fontColorHex'); // New element
+        const fontColor = document.getElementById('fontColor'); 
+        const fontColorHex = document.getElementById('fontColorHex'); 
         const downloadMeme = document.getElementById('downloadMeme');
 
-
-        // Initial default image (Image object to store the current image)
-        let memeImage = new Image();
-        memeImage.onload = () => drawMeme();
+        // Flag to track if a custom image has been loaded (false initially, uses placeholder)
+        let isImageLoaded = false;
         
-     // **CRITICAL FIX: Setting crossOrigin to "anonymous" allows the canvas to read the image data**
-        // This is necessary for canvas.toDataURL() to work without a security error (tainting).
-        memeImage.crossOrigin = "anonymous";
-          // Default placeholder image (using a direct URL)
-        memeImage.src = 'https://placehold.co/600x400/1e293b/FFFFFF?text=Click+to+Upload+Image';
+        // Initial default image object. It will hold the image data once loaded.
+        let memeImage = new Image();
+        memeImage.onload = () => {
+            isImageLoaded = true; // Set flag only when a real image loads (not the placeholder message)
+            drawMeme();
+        };
+        
+        // CRITICAL FIX: Setting crossOrigin is no longer strictly needed for a local app,
+        // but we'll leave it as a general safeguard if you ever switch back to a remote image service.
+        memeImage.crossOrigin = "anonymous"; 
         
         // Canvas dimensions
         const W = canvas.width;
         const H = canvas.height;
+
+        /**
+         * Loads a new image from a URL or File object result into the memeImage.
+         * @param {string} src - The image source (data URL or standard URL).
+         */
+        function loadImage(src) {
+            // Create a new Image object for the incoming source
+            const newImg = new Image();
+            newImg.onload = () => {
+                memeImage = newImg;
+                isImageLoaded = true; // Mark that a user image is now loaded
+                drawMeme();
+            };
+            newImg.onerror = (err) => {
+                console.error("Error loading image:", err);
+            };
+            newImg.src = src;
+        }
+
+        /**
+         * Draws a large, centralized placeholder message to guide the user.
+         */
+        function drawPlaceholderMessage() {
+            // Draw a background fill to give the canvas some color
+            ctx.fillStyle = '#1E293B'; // Slate Blue background color
+            ctx.fillRect(0, 0, W, H);
+            
+            // Set text style for the message
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#6366F1'; // Indigo text color
+            ctx.font = '30px Inter, sans-serif';
+            
+            ctx.fillText("✨ VIBE STARTUP MODE ✨", W / 2, H / 3);
+            
+            ctx.fillStyle = '#E2E8F0'; // Lighter text color
+            ctx.font = '20px Inter, sans-serif';
+            ctx.fillText("1. Upload File or Paste Image (Ctrl/Cmd + V)", W / 2, H / 3 + 40);
+            ctx.fillText("2. Customize Top & Bottom Text", W / 2, H / 3 + 75);
+            ctx.fillText("3. Hit Download!", W / 2, H / 3 + 110);
+            
+            // Reset the image flag so drawMeme knows to skip image drawing
+            isImageLoaded = false; 
+        }
 
         /**
          * The core function to draw the image and text onto the canvas.
@@ -130,19 +212,24 @@
             // 1. Clear the canvas
             ctx.clearRect(0, 0, W, H);
 
-            // 2. Draw the image (scaled to cover the canvas area)
-            const img = memeImage;
-            
-            // Calculate scale to fit the image while maintaining aspect ratio
-            const ratio = Math.max(W / img.width, H / img.height);
-            const x = (W - img.width * ratio) / 2;
-            const y = (H - img.height * ratio) / 2;
-            ctx.drawImage(img, x, y, img.width * ratio, img.height * ratio);
+            // 2. Draw the image OR the placeholder message
+            if (!isImageLoaded) {
+                drawPlaceholderMessage();
+                // We still want to draw the meme text on the placeholder!
+            } else {
+                const img = memeImage;
+                
+                // Calculate scale to fit the image while maintaining aspect ratio
+                const ratio = Math.max(W / img.width, H / img.height);
+                const x = (W - img.width * ratio) / 2;
+                const y = (H - img.height * ratio) / 2;
+                ctx.drawImage(img, x, y, img.width * ratio, img.height * ratio);
+            }
 
-            // 3. Setup text style (white with black outline)
+            // 3. Setup text style (black outline, configurable color fill)
             ctx.strokeStyle = 'black';
             ctx.lineWidth = W * 0.006; // Dynamic line width based on canvas size for scaling
-            ctx.fillStyle = fontColor.value; // Use selected font color
+            ctx.fillStyle = fontColor.value; // Use selected color
             ctx.textAlign = 'center';
             ctx.lineJoin = 'round';
             ctx.textBaseline = 'middle'; // Center text based on its vertical middle
@@ -165,13 +252,6 @@
 
         /**
          * Wraps text and draws it on the canvas, handling the classic meme text effect.
-         * @param {CanvasRenderingContext2D} context - The canvas context.
-         * @param {string} text - The text to draw.
-         * @param {number} x - The x position of the text center.
-         * @param {number} y - The starting y position (top or bottom).
-         * @param {number} maxWidth - Maximum width for a line of text.
-         * @param {number} lineHeight - The height between lines.
-         * @param {boolean} fromBottom - If true, draws text upwards from the Y position.
          */
         function wrapText(context, text, x, y, maxWidth, lineHeight, fromBottom = false) {
             const words = text.split(' ');
@@ -222,13 +302,13 @@
         // --- EVENT LISTENERS ---
 
         // Live text and size updates
-        [topText, bottomText, textSize, fontColor].forEach(el => {
+        [topText, bottomText, textSize, fontColor].forEach(el => { 
             el.addEventListener('input', () => {
                 // Update size value display
                 if (el === textSize) {
                     textSizeValue.textContent = `${textSize.value}px`;
                 }
-                // Update font color hex display
+                // Update hex color display
                 if (el === fontColor) {
                     fontColorHex.textContent = fontColor.value.toUpperCase();
                 }
@@ -236,25 +316,51 @@
             });
         });
 
-        // Image Upload handling
+        // Image Upload handling (via file input)
         imageUpload.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    const newImg = new Image();
-                    newImg.onload = () => {
-                        memeImage = newImg;
-                        drawMeme();
-                    };
-                    newImg.onerror = (err) => {
-                        console.error("Error loading image:", err);
-                    };
-                    newImg.src = e.target.result;
-                };
+                reader.onload = (e) => loadImage(e.target.result); 
                 reader.readAsDataURL(file);
             }
         });
+        
+        // Clipboard Paste Handler
+        document.addEventListener('paste', (event) => {
+            // Check if any focusable element is currently focused (e.g., input fields)
+            const focusedElement = document.activeElement;
+            const isTextControlFocused = 
+                focusedElement && 
+                (focusedElement.id === 'topText' || focusedElement.id === 'bottomText');
+            
+            if (isTextControlFocused) {
+                return;
+            }
+
+            event.preventDefault(); 
+
+            const items = event.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+
+                if (item.type.indexOf('image') !== -1) {
+                    const blob = item.getAsFile();
+                    if (blob) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            loadImage(e.target.result);
+                            console.log("Image pasted successfully from clipboard.");
+                        };
+                        reader.readAsDataURL(blob);
+                        return; 
+                    }
+                }
+            }
+            
+            console.log("Paste detected, but no image data found.");
+        });
+
 
         // Download functionality
         downloadMeme.addEventListener('click', () => {
@@ -275,8 +381,11 @@
             document.body.removeChild(a);
         });
         
-        // Initial draw on load (for the default placeholder image)
+        // Initial draw on load: Call drawMeme to show the placeholder immediately
         document.addEventListener('DOMContentLoaded', drawMeme);
+        // Also call it right away in case DOMContentLoaded has already fired
+        drawMeme(); 
+        })(); // End IIFE
     </script>
 </body>
 </html>
