@@ -60,6 +60,12 @@
             border: 2px solid #6366F1;
             border-radius: 9999px; /* full rounded */
         }
+
+        @media screen and (max-width: 1024px) {
+            #clipboardHint {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -78,7 +84,7 @@
                     <canvas id="memeCanvas" width="600" height="400"></canvas>
                 </div>
                 <!-- Hint for clipboard paste functionality -->
-                <div class="mt-4 text-center text-sm text-gray-400 flex items-center justify-center space-x-2 p-2 bg-slate-800 rounded-lg">
+                <div id="clipboardHint" class="mt-4 text-center text-sm text-gray-400 flex items-center justify-center space-x-2 p-2 bg-slate-800 rounded-lg">
                     <span>
                         🎨 Paste Image Ready! Press <kbd class="px-1 py-0.5 border border-slate-600 rounded-md bg-slate-700 text-teal-300">Ctrl+V</kbd> or <kbd class="px-1 py-0.5 border border-slate-600 rounded-md bg-slate-700 text-teal-300">Cmd+V</kbd> to upload directly from your clipboard.
                     </span>
