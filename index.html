@@ -1,398 +1,276 @@
-<!-- Chosen Palette: Energetic Dark (Deep Purple/Indigo, Teal Accent, Lime Green/Yellow Highlights) -->
-<!-- Application Structure Plan: A two-column (desktop) / stacked (mobile) layout is used. The left column is the "CANVAS" area, providing immediate visual feedback. The right column is the "CONTROL PANEL," housing all inputs. This structure prioritizes the creation flow, ensuring inputs and outputs are side-by-side on large screens for maximum usability. The design uses dark backgrounds and vibrant accents for a modern, energetic feel. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="./img/favicon.png" type="image/png"/>
+    <link rel="icon" href="./img/favicon.png">
     <title>Meme Generator</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Set a dark, energetic background */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+
         body {
-            background-color: #0F172A; /* Deep Slate Blue */
-            color: #E2E8F0; /* Light text */
-            font-family: 'Inter', sans-serif;
+            background-color: #0F172A;
+            color: #E2E8F0;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        /* Ensure the canvas container is fluid and responsive */
         #canvas-container {
             width: 100%;
-            /* Maximum width constraint for desktop to keep the meme readable */
             max-width: 600px; 
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto;
             position: relative;
         }
         
         #memeCanvas {
-            border: 2px solid #6366F1; /* Purple border */
-            border-radius: 0.75rem; /* Rounded corners */
-            width: 100%; /* Important: Canvas element itself must be 100% of container */
+            border: 2px solid #6366F1;
+            border-radius: 1rem;
+            width: 100%;
             height: auto;
+            background: #1e293b;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
-        /* Style for the color picker input */
-        #fontColor {
+        .input-styled {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-styled:focus {
+            border-color: #6366F1;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .label-meta {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #94a3b8;
+        }
+
+        /* Custom Slider Styling */
+        input[type=range] {
+            height: 6px;
             -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            border: none;
-            background: none;
-            cursor: pointer;
-        }
-        #fontColor::-webkit-color-swatch-wrapper {
-            padding: 0;
-        }
-        #fontColor::-webkit-color-swatch {
-            border: 2px solid #6366F1;
-            border-radius: 9999px; /* full rounded */
-        }
-        #fontColor::-moz-color-swatch-wrapper {
-            padding: 0;
-        }
-        #fontColor::-moz-color-swatch {
-            border: 2px solid #6366F1;
-            border-radius: 9999px; /* full rounded */
+            background: #334155;
+            border-radius: 3px;
+            width: 100%;
         }
 
-        @media screen and (max-width: 1024px) {
-            #clipboardHint {
-                display: none;
-            }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #6366F1;
+            cursor: pointer;
+            border: 2px solid #ffffff;
         }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-8 lg:p-12">
 
-    <div class="container mx-auto p-4 md:p-8">
-        <h1 class="text-4xl font-extrabold text-center mb-10 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-teal-400">
-            ✨ MEME GENERATOR ✨
-        </h1>
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-10 text-center lg:text-left">
+            <h1 class="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-teal-400">
+                MEME GENERATOR
+            </h1>
+            <p class="label-meta mt-2">Vibe Studio Edition • Manual Text Positioning</p>
+        </header>
 
-        <div class="lg:grid lg:grid-cols-5 lg:gap-8">
+        <div class="grid lg:grid-cols-12 gap-10">
             
-            <!-- 1. Meme Canvas Area (Left/Top) -->
-            <section class="lg:col-span-3 mb-8 lg:mb-0">
-                <div id="canvas-container" class="shadow-2xl shadow-indigo-900/50">
-                    <!-- The canvas is where the magic happens and the final image is drawn -->
-                    <canvas id="memeCanvas" width="600" height="400"></canvas>
+            <!-- Preview Column -->
+            <div class="lg:col-span-7 space-y-6">
+                <div id="canvas-container">
+                    <canvas id="memeCanvas" width="800" height="800"></canvas>
                 </div>
-                <!-- Hint for clipboard paste functionality -->
-                <div id="clipboardHint" class="mt-4 text-center text-sm text-gray-400 flex items-center justify-center space-x-2 p-2 bg-slate-800 rounded-lg">
-                    <span>
-                        🎨 Paste Image Ready! Press <kbd class="px-1 py-0.5 border border-slate-600 rounded-md bg-slate-700 text-teal-300">Ctrl+V</kbd> or <kbd class="px-1 py-0.5 border border-slate-600 rounded-md bg-slate-700 text-teal-300">Cmd+V</kbd> to upload directly from your clipboard.
-                    </span>
+                <div class="hidden lg:block p-4 rounded-xl bg-slate-800/50 border border-white/5 text-center">
+                    <p class="text-sm text-slate-400">🎨 <span class="font-bold text-teal-400">Pro Tip:</span> Paste an image (Ctrl+V) directly to upload.</p>
                 </div>
-                <div class="mt-2 text-center text-sm text-gray-400">
-                    Meme Size: 600x400 (aspect ratio is maintained for downloads)
-                </div>
-            </section>
+            </div>
 
-            <!-- 2. Input/Control Panel (Right/Bottom) -->
-            <section class="lg:col-span-2 p-6 bg-slate-800 rounded-xl shadow-inner shadow-teal-700/30 space-y-6">
-                
-                <!-- Image Upload -->
-                <div class="space-y-2">
-                    <label for="imageUpload" class="block text-sm font-medium text-teal-400">1. Upload Image (JPG/PNG)</label>
-                    <input type="file" id="imageUpload" accept="image/png, image/jpeg" class="w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 transition duration-150 rounded-lg bg-slate-700 p-2 cursor-pointer">
-                </div>
+            <!-- UI Column -->
+            <div class="lg:col-span-5">
+                <div class="bg-slate-800/80 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-2xl space-y-8">
+                    
+                    <!-- Media Section -->
+                    <div class="space-y-3">
+                        <label class="label-meta">1. Select Base Image</label>
+                        <input type="file" id="imageUpload" accept="image/*" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-600 file:text-white bg-slate-900 p-2 rounded-lg cursor-pointer">
+                    </div>
 
-                <!-- Top Text Input -->
-                <div class="space-y-2">
-                    <label for="topText" class="block text-sm font-medium text-teal-400">2. Top Text</label>
-                    <input type="text" id="topText" placeholder="ENTER TOP TEXT HERE"  maxlength="50" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:border-indigo-500 focus:ring focus:ring-indigo-500/50 text-white placeholder-gray-500">
-                </div>
+                    <!-- Top Text Section -->
+                    <div class="space-y-4 p-4 bg-slate-900/50 rounded-xl border border-white/5">
+                        <label class="label-meta text-indigo-400">2. Top Text</label>
+                        <input type="text" id="topText" placeholder="ENTER TOP TEXT HERE" class="input-styled w-full p-3 text-lg font-bold uppercase">
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-[9px] uppercase text-slate-500 font-bold">Vertical Position</span>
+                                <span id="topYVal" class="text-[10px] text-indigo-400 font-bold">15%</span>
+                            </div>
+                            <input type="range" id="topY" min="0" max="100" value="15">
+                        </div>
+                    </div>
 
-                <!-- Bottom Text Input -->
-                <div class="space-y-2">
-                    <label for="bottomText" class="block text-sm font-medium text-teal-400">3. Bottom Text</label>
-                    <input type="text" id="bottomText" placeholder="ENTER BOTTOM TEXT HERE" maxlength="50" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:border-indigo-500 focus:ring focus:ring-indigo-500/50 text-white placeholder-gray-500">
-                </div>
+                    <!-- Bottom Text Section -->
+                    <div class="space-y-4 p-4 bg-slate-900/50 rounded-xl border border-white/5">
+                        <label class="label-meta text-teal-400">3. Bottom Text</label>
+                        <input type="text" id="bottomText" placeholder="ENTER BOTTOM TEXT HERE" class="input-styled w-full p-3 text-lg font-bold uppercase">
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-[9px] uppercase text-slate-500 font-bold">Vertical Position</span>
+                                <span id="botYVal" class="text-[10px] text-teal-400 font-bold">85%</span>
+                            </div>
+                            <input type="range" id="bottomY" min="0" max="100" value="85">
+                        </div>
+                    </div>
 
-                <!-- Text Size Slider -->
-                <div class="space-y-2">
-                    <label for="textSize" class="block text-sm font-medium text-teal-400">4. Text Size: <span id="textSizeValue" class="font-bold text-lg">40px</span></label>
-                    <input type="range" id="textSize" min="10" max="80" value="40" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer range-lg accent-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-                
-                <!-- Font Color Picker -->
-                <div class="flex justify-between items-center space-x-4 pt-2">
-                    <label for="fontColor" class="block text-sm font-medium text-teal-400">5. Font Color</label>
-                    <div class="flex items-center space-x-2 bg-slate-700 rounded-full p-1 border border-indigo-500">
-                        <input type="color" id="fontColor" value="#FFFFFF">
-                        <span id="fontColorHex" class="text-xs font-mono text-gray-300 pr-2">#FFFFFF</span>
+                    <!-- Appearance -->
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="label-meta">Text Size</label>
+                            <input type="range" id="textSize" min="20" max="150" value="60">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="label-meta">Text Color</label>
+                            <input type="color" id="textColor" value="#ffffff" class="w-full h-8 bg-transparent cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- Export -->
+                    <div class="pt-4 space-y-3">
+                        <button id="downloadBtn" class="w-full bg-lime-500 hover:bg-lime-400 text-slate-900 py-4 rounded-xl font-black text-sm uppercase tracking-widest transition shadow-lg shadow-lime-500/20 active:scale-95">
+                            Download Meme 🔥
+                        </button>
+                        <button id="resetBtn" class="w-full bg-slate-900 text-slate-500 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:text-white transition">
+                            Reset Canvas
+                        </button>
                     </div>
                 </div>
-
-                <!-- Download Button -->
-                <button id="downloadMeme" class="w-full py-3 mt-8 text-lg font-bold rounded-full bg-lime-500 text-slate-900 hover:bg-lime-400 transition duration-150 transform hover:scale-[1.02] shadow-xl shadow-lime-500/30 focus:outline-none focus:ring-4 focus:ring-lime-500/50">
-                    DOWNLOAD MEME 🔥
-                </button>
-            </section>
+            </div>
         </div>
     </div>
 
     <script>
-        (function() { // Wrap script content in IIFE to prevent global variable re-declaration error
-        const canvas = document.getElementById('memeCanvas');
-        const ctx = canvas.getContext('2d');
-        const imageUpload = document.getElementById('imageUpload');
-        const topText = document.getElementById('topText');
-        const bottomText = document.getElementById('bottomText');
-        const textSize = document.getElementById('textSize');
-        const textSizeValue = document.getElementById('textSizeValue');
-        const fontColor = document.getElementById('fontColor'); 
-        const fontColorHex = document.getElementById('fontColorHex'); 
-        const downloadMeme = document.getElementById('downloadMeme');
+        (function() {
+            const canvas = document.getElementById('memeCanvas');
+            const ctx = canvas.getContext('2d');
+            const topIn = document.getElementById('topText');
+            const botIn = document.getElementById('bottomText');
+            const topY = document.getElementById('topY');
+            const botY = document.getElementById('bottomY');
+            const textSize = document.getElementById('textSize');
+            const textColor = document.getElementById('textColor');
+            const imageIn = document.getElementById('imageUpload');
 
-        // Flag to track if a custom image has been loaded (false initially, uses placeholder)
-        let isImageLoaded = false;
-        
-        // Initial default image object. It will hold the image data once loaded.
-        let memeImage = new Image();
-        memeImage.onload = () => {
-            isImageLoaded = true; // Set flag only when a real image loads (not the placeholder message)
-            drawMeme();
-        };
-        
-        // CRITICAL FIX: Setting crossOrigin is no longer strictly needed for a local app,
-        // but we'll leave it as a general safeguard if you ever switch back to a remote image service.
-        memeImage.crossOrigin = "anonymous"; 
-        
-        // Canvas dimensions
-        const W = canvas.width;
-        const H = canvas.height;
+            let bg = null;
+            const CANVAS_SIZE = 800;
 
-        /**
-         * Loads a new image from a URL or File object result into the memeImage.
-         * @param {string} src - The image source (data URL or standard URL).
-         */
-        function loadImage(src) {
-            // Create a new Image object for the incoming source
-            const newImg = new Image();
-            newImg.onload = () => {
-                memeImage = newImg;
-                isImageLoaded = true; // Mark that a user image is now loaded
-                drawMeme();
-            };
-            newImg.onerror = (err) => {
-                console.error("Error loading image:", err);
-            };
-            newImg.src = src;
-        }
+            function drawMeme() {
+                // Background
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-        /**
-         * Draws a large, centralized placeholder message to guide the user.
-         */
-        function drawPlaceholderMessage() {
-            // Draw a background fill to give the canvas some color
-            ctx.fillStyle = '#1E293B'; // Slate Blue background color
-            ctx.fillRect(0, 0, W, H);
-            
-            // Set text style for the message
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#6366F1'; // Indigo text color
-            ctx.font = '30px Inter, sans-serif';
-            
-            ctx.fillText("✨ VIBE STARTUP MODE ✨", W / 2, H / 3);
-            
-            ctx.fillStyle = '#E2E8F0'; // Lighter text color
-            ctx.font = '20px Inter, sans-serif';
-            ctx.fillText("1. Upload File or Paste Image (Ctrl/Cmd + V)", W / 2, H / 3 + 40);
-            ctx.fillText("2. Customize Top & Bottom Text", W / 2, H / 3 + 75);
-            ctx.fillText("3. Hit Download!", W / 2, H / 3 + 110);
-            
-            // Reset the image flag so drawMeme knows to skip image drawing
-            isImageLoaded = false; 
-        }
-
-        /**
-         * The core function to draw the image and text onto the canvas.
-         */
-        function drawMeme() {
-            // 1. Clear the canvas
-            ctx.clearRect(0, 0, W, H);
-
-            // 2. Draw the image OR the placeholder message
-            if (!isImageLoaded) {
-                drawPlaceholderMessage();
-                // We still want to draw the meme text on the placeholder!
-            } else {
-                const img = memeImage;
-                
-                // Calculate scale to fit the image while maintaining aspect ratio
-                const ratio = Math.max(W / img.width, H / img.height);
-                const x = (W - img.width * ratio) / 2;
-                const y = (H - img.height * ratio) / 2;
-                ctx.drawImage(img, x, y, img.width * ratio, img.height * ratio);
-            }
-
-            // 3. Setup text style (black outline, configurable color fill)
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = W * 0.006; // Dynamic line width based on canvas size for scaling
-            ctx.fillStyle = fontColor.value; // Use selected color
-            ctx.textAlign = 'center';
-            ctx.lineJoin = 'round';
-            ctx.textBaseline = 'middle'; // Center text based on its vertical middle
-
-            // Get current font size from slider
-            const fontSize = parseInt(textSize.value, 10);
-            const fontString = `${fontSize}px Impact, sans-serif`;
-            ctx.font = fontString;
-            
-            // 4. Draw Top Text
-            const top = topText.value.toUpperCase();
-            // Start line position (y position for the top of the text block)
-            wrapText(ctx, top, W / 2, H * 0.08, W * 0.9, fontSize * 1.2); 
-
-            // 5. Draw Bottom Text
-            const bottom = bottomText.value.toUpperCase();
-            // Start line position (y position for the bottom of the text block)
-            wrapText(ctx, bottom, W / 2, H * 0.92, W * 0.9, fontSize * 1.2, true); 
-        }
-
-        /**
-         * Wraps text and draws it on the canvas, handling the classic meme text effect.
-         */
-        function wrapText(context, text, x, y, maxWidth, lineHeight, fromBottom = false) {
-            const words = text.split(' ');
-            let line = '';
-            let lines = [];
-
-            // Logic to break text into lines based on maxWidth
-            for(let n = 0; n < words.length; n++) {
-                const testLine = line + words[n] + ' ';
-                const metrics = context.measureText(testLine);
-                const testWidth = metrics.width;
-
-                if (testWidth > maxWidth && n > 0) {
-                    lines.push(line);
-                    line = words[n] + ' ';
+                if (bg) {
+                    const ratio = Math.max(CANVAS_SIZE / bg.width, CANVAS_SIZE / bg.height);
+                    const w = bg.width * ratio;
+                    const h = bg.height * ratio;
+                    ctx.drawImage(bg, (CANVAS_SIZE - w) / 2, (CANVAS_SIZE - h) / 2, w, h);
                 } else {
-                    line = testLine;
+                    ctx.fillStyle = '#334155';
+                    ctx.textAlign = 'center';
+                    ctx.font = 'bold 20px Space Grotesk';
+                    ctx.fillText('SELECT OR PASTE AN IMAGE', CANVAS_SIZE/2, CANVAS_SIZE/2);
+                }
+
+                // Text Setup
+                const fontSize = parseInt(textSize.value);
+                ctx.font = `900 ${fontSize}px Space Grotesk, sans-serif`;
+                ctx.fillStyle = textColor.value;
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = fontSize / 6;
+                ctx.lineJoin = 'round';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const tText = topIn.value.toUpperCase();
+                const bText = botIn.value.toUpperCase();
+
+                // Top Text
+                if (tText) {
+                    const ty = (topY.value / 100) * CANVAS_SIZE;
+                    ctx.strokeText(tText, CANVAS_SIZE/2, ty);
+                    ctx.fillText(tText, CANVAS_SIZE/2, ty);
+                    document.getElementById('topYVal').textContent = topY.value + '%';
+                }
+
+                // Bottom Text
+                if (bText) {
+                    const by = (botY.value / 100) * CANVAS_SIZE;
+                    ctx.strokeText(bText, CANVAS_SIZE/2, by);
+                    ctx.fillText(bText, CANVAS_SIZE/2, by);
+                    document.getElementById('botYVal').textContent = botY.value + '%';
                 }
             }
-            lines.push(line.trim()); // Add the last line
 
-            // Determine starting position based on top/bottom alignment
-            let startY = y;
-            if (fromBottom) {
-                // If drawing from bottom, adjust start Y position up based on total height
-                startY = y - (lines.length - 1) * lineHeight;
-            }
-
-            // Draw each line
-            for(let n = 0; n < lines.length; n++) {
-                const lineToDraw = lines[n];
-                
-                let drawY;
-                if (fromBottom) {
-                    // Lines are drawn starting from the top of the text block and moving down
-                    drawY = startY + n * lineHeight;
-                } else {
-                    // Lines are drawn starting from the top of the text block and moving down
-                    drawY = startY + n * lineHeight;
-                }
-
-                context.strokeText(lineToDraw, x, drawY);
-                context.fillText(lineToDraw, x, drawY);
-            }
-        }
-
-
-        // --- EVENT LISTENERS ---
-
-        // Live text and size updates
-        [topText, bottomText, textSize, fontColor].forEach(el => { 
-            el.addEventListener('input', () => {
-                // Update size value display
-                if (el === textSize) {
-                    textSizeValue.textContent = `${textSize.value}px`;
-                }
-                // Update hex color display
-                if (el === fontColor) {
-                    fontColorHex.textContent = fontColor.value.toUpperCase();
-                }
-                drawMeme(); // Redraw on every input change
+            // Input Listeners
+            [topIn, botIn, topY, botY, textSize, textColor].forEach(el => {
+                el.addEventListener('input', drawMeme);
             });
-        });
 
-        // Image Upload handling (via file input)
-        imageUpload.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => loadImage(e.target.result); 
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        // Clipboard Paste Handler
-        document.addEventListener('paste', (event) => {
-            // Check if any focusable element is currently focused (e.g., input fields)
-            const focusedElement = document.activeElement;
-            const isTextControlFocused = 
-                focusedElement && 
-                (focusedElement.id === 'topText' || focusedElement.id === 'bottomText');
-            
-            if (isTextControlFocused) {
-                return;
-            }
+            // Image Loader
+            imageIn.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) handleFile(file);
+            });
 
-            event.preventDefault(); 
-
-            const items = event.clipboardData.items;
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-
-                if (item.type.indexOf('image') !== -1) {
-                    const blob = item.getAsFile();
-                    if (blob) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            loadImage(e.target.result);
-                            console.log("Image pasted successfully from clipboard.");
-                        };
-                        reader.readAsDataURL(blob);
-                        return; 
+              // Paste Listener - Enhanced
+            window.addEventListener('paste', (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        const blob = item.getAsFile();
+                        handleFile(blob);
+                        break;
                     }
                 }
+            });
+
+
+            function handleFile(file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => { bg = img; drawMeme(); };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
             }
-            
-            console.log("Paste detected, but no image data found.");
-        });
 
+            // Buttons
+            document.getElementById('downloadBtn').addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.download = `vibe-meme-${Date.now()}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
 
-        // Download functionality
-        downloadMeme.addEventListener('click', () => {
-            // Ensure the final drawing is complete before downloading
-            drawMeme(); 
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                bg = null; topIn.value = ""; botIn.value = ""; drawMeme();
+            });
 
-            // Use the canvas API to create a data URL
-            const imageURL = canvas.toDataURL('image/png');
-            
-            // Create a temporary link element
-            const a = document.createElement('a');
-            a.href = imageURL;
-            a.download = `vibe-meme-${Date.now()}.png`;
-            
-            // Append to body, click, and remove
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        });
-        
-        // Initial draw on load: Call drawMeme to show the placeholder immediately
-        document.addEventListener('DOMContentLoaded', drawMeme);
-        // Also call it right away in case DOMContentLoaded has already fired
-        drawMeme(); 
-        })(); // End IIFE
+            // Init
+            drawMeme();
+        })();
     </script>
 </body>
 </html>
