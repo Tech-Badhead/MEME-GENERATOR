@@ -46,16 +46,4 @@ Style: Adjust the Font Size and Text Color to make your message pop against the 
 
 Save: Hit "Download Meme 🔥" to save the result to your device.
 
-📁 Project Structure
-
-Currently, the project is optimized for a three-file deployment to ensure immediate compatibility and the structure makes the project much easier to manage and scale while maintaining the vertical positioning sliders and the enhanced paste functionality:
-
-index.html: Contains the structural layout,
-styles.css: Contains CSS styling via Tailwind/Custom Styles, and
-script.js: Contains the Canvas-based JavaScript engine.
-
-📝 License
-
-This project is open-source and available for personal or educational use.
-
 Created with ⚡ at Vibe Studio
