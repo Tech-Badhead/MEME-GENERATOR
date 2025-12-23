@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+
+body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+  font-family: 'Space Grotesk',
+    sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+#canvas-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+
+#memeCanvas {
+  border: 2px solid #6366f1;
+  border-radius: 1rem;
+  width: 100%;
+  height: auto;
+  background: #1e293b;
+  box-shadow: 0 20px 50px
+    rgba(0, 0, 0, 0.5);
+}
+
+.input-styled {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.input-styled:focus {
+  border-color: #6366f1;
+  outline: none;
+}
+
+.label-meta {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #94a3b8;
+}
+
+/* Custom Slider Styling */
+input[type='range'] {
+  height: 6px;
+  -webkit-appearance: none;
+  background: #334155;
+  border-radius: 3px;
+  width: 100%;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #6366f1;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+}
