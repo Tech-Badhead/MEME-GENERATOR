@@ -46,4 +46,4 @@ A sleek, high-performance web-based Meme Generator built with a focus on modern 
 
 - Save: Hit "Download Meme 🔥" to save the result to your device.
 
-Created with ⚡ at Vibe Studio
+Created with ⚡ at Vibe Studio by Akeem Usman
